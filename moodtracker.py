@@ -6,6 +6,7 @@
 # Each Entry is given and ID for better editing and search functions.
 # User can add the mood and optional notes when creating a new entry.
 
+import gradio as gr
 import json
 import os
 from datetime import datetime
@@ -45,22 +46,23 @@ def create_mood_entry(mood, notes=None):
     }
     entries.append(entry)
     save_entries(entries)
-    print(f"Mood entry saved with ID: {new_id}")
+    return f"Mood entry saved with ID: {new_id}"
 
 def view_mood_entries():
     """Viewing all mood entries."""
     entries = load_entries()
     if not entries:
-        print("No mood entries found.")
+        return "No mood entries found."
     else:
-        print("Mood Tracker Entries:")
+        result = []
         for entry in entries:
-            print(f"ID: {entry['id']}")
-            print(f"Timestamp: {entry['timestamp']}")
-            print(f"Mood: {entry['mood']}")
-            if entry.get("notes"):
-                print(f"Notes: {entry['notes']}")
-            print("-" * 40)
+            entry_str = (f"ID: {entry['id']}\n"
+                         f"Timestamp: {entry['timestamp']}\n"
+                         f"Mood: {entry['mood']}\n"
+                         f"Notes: {entry.get('notes', 'None')}\n"
+                         + "-" * 40)
+            result.append(entry_str)
+        return "\n".join(result)
 
 def edit_mood_entry(entry_id, new_mood, new_notes=None):
     """Editing an existing mood entry by ID."""
@@ -74,57 +76,58 @@ def edit_mood_entry(entry_id, new_mood, new_notes=None):
             break
     if found:
         save_entries(entries)
-        print("Entry edited successfully.")
+        return "Entry edited successfully."
     else:
-        print("Entry not found.")
+        return "Entry not found."
 
 def delete_mood_entry(entry_id):
     """Deleting an existing mood entry by ID."""
     entries = load_entries()
     updated_entries = [entry for entry in entries if entry['id'] != entry_id]
     if len(updated_entries) == len(entries):
-        print("Entry not found.")
+        return "Entry not found."
     else:
         save_entries(updated_entries)
-        print("Entry deleted successfully.")
+        return "Entry deleted successfully."
 
-def show_mood_menu():
-    """Displaying the Mood Tracker menu and handle user input - Aditi - 10/14/2024"""
-    while True:
-        print("\nMood Tracker Menu")
-        print("1. Create a new mood entry")
-        print("2. View all mood entries")
-        print("3. Edit a mood entry")
-        print("4. Delete a mood entry")
-        print("5. Go back")
-        choice = input("Enter your choice: ")
+def mood_interface():
+    with gr.Blocks() as app:
+        gr.Markdown("# Mood Tracker")
 
-        if choice == '1':
-            mood = input("Enter your mood: ")
-            notes = input("Enter any notes (or leave blank): ")
-            notes = notes if notes else None
-            moodtracker.create_mood_entry(mood, notes)
-        elif choice == '2':
-            moodtracker.view_mood_entries()
-        elif choice == '3':
-            try:
-                entry_id = int(input("Enter the ID of the mood entry you want to edit: "))
-                new_mood = input("Enter the new mood: ")
-                new_notes = input("Enter the new notes (or leave blank): ")
-                new_notes = new_notes if new_notes else None
-                moodtracker.edit_mood_entry(entry_id, new_mood, new_notes)
-            except ValueError:
-                print("Invalid ID. Please enter a valid number.")
-        elif choice == '4':
-            try:
-                entry_id = int(input("Enter the ID of the mood entry you want to delete: "))
-                moodtracker.delete_mood_entry(entry_id)
-            except ValueError:
-                print("Invalid ID. Please enter a valid number.")
-        elif choice == '5':
-            print("Returning to main menu...")
-            break
-        else:
-            print("Invalid choice. Please try again.")
-if __name__ == "__main__":
-    show_mood_menu() 
+        # Predefined moods scale
+        mood_options = ["Happy", "Sad", "Excited", "Stressed", "Calm", "Anxious", "Angry", "Relaxed"]
+
+        # Create Entry
+        with gr.Tab("Create Entry"):
+            mood_input = gr.Radio(label="Select Your Mood", choices=mood_options)
+            notes_input = gr.Textbox(label="Notes (Optional)", lines=3)
+            create_button = gr.Button("Create Mood Entry")
+            create_output = gr.Textbox(label="Message")
+            create_button.click(fn=create_mood_entry, inputs=[mood_input, notes_input], outputs=create_output)
+
+        # View, Edit and Delete Entries in one Tab
+        with gr.Tab("View Entries"):
+            view_button = gr.Button("View All Entries")
+            view_output = gr.Textbox(label="All Mood Entries", lines=10)
+            view_button.click(fn=view_mood_entries, outputs=view_output)
+
+            gr.Markdown("### Edit or Delete an Entry")
+
+            entry_id_input = gr.Number(label="Entry ID", value=None)
+
+            # Edit Entry with predefined moods
+            new_mood_input = gr.Radio(label="New Mood", choices=mood_options)
+            new_notes_input = gr.Textbox(label="New Notes (Optional)", lines=3)
+            edit_button = gr.Button("Edit Mood Entry")
+            edit_output = gr.Textbox(label="Edit Message")
+            edit_button.click(fn=edit_mood_entry, inputs=[entry_id_input, new_mood_input, new_notes_input], outputs=edit_output)
+
+            # Delete Entry
+            delete_button = gr.Button("Delete Mood Entry")
+            delete_output = gr.Textbox(label="Delete Message")
+            delete_button.click(fn=delete_mood_entry, inputs=[entry_id_input], outputs=delete_output)
+
+    return app
+
+# Launch Gradio app
+mood_interface().launch()
