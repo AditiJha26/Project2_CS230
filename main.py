@@ -4,7 +4,11 @@ import datetime
 from Goals import Goal, GoalTracker
 
 def show_personal_menu():
+<<<<<<< HEAD
 
+=======
+    """Displaying the Personal journal menu and handle user input - Aditi - 10/14/2024"""
+>>>>>>> a892ff5678bfc8cfc3088a5f19201f26ccd7bc40
     while True:
         print("\nPersonal Journal Menu")
         print("1. Create a new entry")
@@ -16,16 +20,24 @@ def show_personal_menu():
 
         if choice == '1':
             content = input("Enter your personal journal entry: ")
-            personal.create_personal_entry(content)
+            image_path = input("Enter the path to your image (or leave blank): ")
+            image_path = image_path if image_path else None
+            personal.create_personal_entry(content, image_path)
         elif choice == '2':
             personal.view_personal_entries()
         elif choice == '3':
-            old_content = input("Enter the content you want to edit: ")
-            new_content = input("Enter the new content: ")
-            personal.edit_personal_entry(old_content, new_content)
+            try:
+                entry_id = int(input("Enter the ID of the entry you want to edit: "))
+                new_content = input("Enter the new content: ")
+                personal.edit_personal_entry(entry_id, new_content)
+            except ValueError:
+                print("Invalid ID. Please enter a valid number.")
         elif choice == '4':
-            content = input("Enter the content of the entry you want to delete: ")
-            personal.delete_personal_entry(content)
+            try:
+                entry_id = int(input("Enter the ID of the entry you want to delete: "))
+                personal.delete_personal_entry(entry_id)
+            except ValueError:
+                print("Invalid ID. Please enter a valid number.")
         elif choice == '5':
             print("Returning to main menu...")
             break
@@ -82,8 +94,12 @@ def show_goal_tracker_menu(tracker):
             print("Invalid choice. Please try again.")
 
 def show_main_menu():
+<<<<<<< HEAD
     """Display the main menu for the journal app. ~ Aditi ~ 10/07/2024"""
     tracker = GoalTracker()
+=======
+    """Displaying the main menu for the journal app - Aditi - 10/14/2024"""
+>>>>>>> a892ff5678bfc8cfc3088a5f19201f26ccd7bc40
     while True:
         print("\nMain Menu")
         print("1. Personal Journal")
