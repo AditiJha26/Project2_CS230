@@ -1,167 +1,170 @@
-import personal
-import moodtracker
-import datetime
+# Author: Aditi Jha
+# October 23, 2024: Combined all code to get one main (starter) file. Added corrected gradio interface, added security pin, added starting menu options. 
+
 import gradio as gr
+import personal
+import goal
+import moodtracker
+import ideas
+import os
+import base64
 
-from Goals import Goal, GoalTracker
+# Security key for accessing the app
+SECURITY_KEY = "1234"
 
-def show_personal_menu():
-<<<<<<< HEAD
+def check_security_key(input_key):
+    """Check if the entered security key is correct."""
+    if input_key == SECURITY_KEY:
+        return gr.update(visible=True), gr.update(visible=False)  # Show the app and hide the login
+    else:
+        return gr.update(visible=False), gr.update(visible=True, value="Incorrect key. Try again.")
+    
+def create_entry_interface(content, image_file):
+    """Gradio interface for creating a new entry."""
+    image_data = None
+    if image_file is not None:
+        # Handle Gradio's file object by accessing the file path
+        image_path = image_file.name  # Get the uploaded file's name
+        with open(image_path, 'rb') as img_file:  # Open the file and read it as binary
+            image_data = base64.b64encode(img_file.read()).decode('utf-8')  # Read the file content and encode to base64
 
-=======
-    """Displaying the Personal journal menu and handle user input - Aditi - 10/14/2024"""
->>>>>>> a892ff5678bfc8cfc3088a5f19201f26ccd7bc40
-    while True:
-        print("\nPersonal Journal Menu")
-        print("1. Create a new entry")
-        print("2. View all entries")
-        print("3. Edit an entry")
-        print("4. Delete an entry")
-        print("5. Go back")
-        choice = input("Enter your choice: ")
+    return personal.create_personal_entry(content, image_data)
 
-        if choice == '1':
-            content = input("Enter your personal journal entry: ")
-            image_path = input("Enter the path to your image (or leave blank): ")
-            image_path = image_path if image_path else None
-            personal.create_personal_entry(content, image_path)
-        elif choice == '2':
-            personal.view_personal_entries()
-        elif choice == '3':
-            try:
-                entry_id = int(input("Enter the ID of the entry you want to edit: "))
-                new_content = input("Enter the new content: ")
-                personal.edit_personal_entry(entry_id, new_content)
-            except ValueError:
-                print("Invalid ID. Please enter a valid number.")
-        elif choice == '4':
-            try:
-                entry_id = int(input("Enter the ID of the entry you want to delete: "))
-                personal.delete_personal_entry(entry_id)
-            except ValueError:
-                print("Invalid ID. Please enter a valid number.")
-        elif choice == '5':
-            print("Returning to main menu...")
-            break
+
+def view_entries_interface():
+    """Gradio interface for viewing all entries."""
+    entries = personal.view_personal_entries()
+    if not entries:
+        return "No entries found.", []
+    
+    # Generate display text and collect image paths
+    display_text = ""
+    image_paths = []
+    for entry in entries:
+        display_text += f"ID: {entry['id']}\nTimestamp: {entry['timestamp']}\nContent: {entry['content']}\n"
+        if entry.get('image_path'):
+            image_paths.append(entry['image_path'])  # Append the image path directly
         else:
-            print("Invalid choice. Please try again.")
+            display_text += "No Image\n"
+        display_text += "-" * 40 + "\n"
+    
+    return display_text, image_paths  # Return the paths for the gallery
 
-def show_goal_tracker_menu(tracker):
-    while True:
-        print("\nGoal Tracker")
-        print("1. Set a new goal")
-        print("2. View goals")
-        print("3. Mark goal as completed")
-        print("4. Delete a goal")
-        print("5. Go back")
+def search_entry_by_id(entry_id):
+    """Gradio interface to search for an entry by its ID."""
+    entry = personal.search_entry_by_id(int(entry_id))  # Get the entry by ID
+    if entry:
+        entry_text = f"ID: {entry['id']}\nTimestamp: {entry['timestamp']}\nContent: {entry['content']}\n"
+        image_paths = [entry['image_path']] if entry.get('image_path') else []
+        return entry_text, image_paths
+    else:
+        return "Entry not found.", []
 
-        choice = input("Enter your choice: ")
+def edit_entry_interface(entry_id, new_content):
+    """Gradio interface for editing an entry by ID."""
+    return personal.edit_personal_entry(entry_id, new_content)
 
-        if choice == '1':
-            goal_type = input("Enter goal type (yearly/monthly/daily): ").lower()
-            
-            if goal_type not in ['yearly', 'monthly', 'daily']:
-                print("Invalid input. Please try again.")
-                continue
-            description = input("Enter your goal: ")
-            date_created = datetime.date.today().strftime("%Y-%m-%d")
-            new_goal = Goal(description, goal_type, date_created)
-            tracker.add_goals(new_goal)
-            print("Goal added successfully!")
+def delete_entry_interface(entry_id):
+    """Gradio interface for deleting an entry by ID."""
+    return personal.delete_personal_entry(entry_id)
 
-        elif choice == '2':
-            tracker.view_goals()
-
-        elif choice == '3':
-            tracker.view_goals()
-            try:
-                index = int(input("Enter the number of the goal to mark as complete: "))
-                tracker.complete_goal(index)
-            except ValueError:
-                print("Invalid input. Please enter a number.")
-
-        elif choice =='4':
-            tracker.view_goals()
-            try:
-                index = int(input("Enter the number of the goal to delete:"))
-                tracker.delete_goal(index)
-            except ValueError:
-                print("Invalid input. Please enter a number.")
-
-        elif choice == '5':
-            print("Returning to main menu...")
-            break
-
-        else:
-            print("Invalid choice. Please try again.")
-
-def mood_interface():
-    with gr.Blocks() as app:
-        gr.Markdown("# Mood Tracker")
-
-       
-        mood_options = ["Happy", "Sad", "Excited", "Stressed", "Calm", "Anxious", "Angry", "Relaxed"]
-
-       
-        with gr.Tab("Create Entry"):
-            mood_input = gr.Radio(label="Select Your Mood", choices=mood_options)
-            notes_input = gr.Textbox(label="Notes (Optional)", lines=3)
-            create_button = gr.Button("Create Mood Entry")
-            create_output = gr.Textbox(label="Message")
-            create_button.click(fn=create_mood_entry, inputs=[mood_input, notes_input], outputs=create_output)
-
+def add_image_interface(entry_id, image_file):
+    """Gradio interface for adding an image to an entry by ID."""
+    try:
+        entry_id = int(entry_id)  # Ensure ID is an integer
+        if image_file is None:
+            return "No image uploaded."
         
+        # Convert the uploaded file to base64
+        image_path = image_file.name  # Get the uploaded file's name
+        with open(image_path, 'rb') as img_file:
+            image_data = base64.b64encode(img_file.read()).decode('utf-8')  # Read and encode file content
+        
+        result = personal.add_image_to_entry(entry_id, image_data)
+        return result
+    except ValueError:
+        return "Invalid ID. Please enter a valid number."
+    except Exception as e:
+        return f"Failed to process the image: {str(e)}"
+
+# Personal Journal tab
+def personal_tab():
+    with gr.Blocks() as personal_interface:
+        gr.Markdown("## Personal Journal")
+        with gr.Tab("Create Entry"):
+            content = gr.Textbox(label="Enter your personal journal entry:")
+            image_file = gr.File(label="Upload Image File")
+            create_button = gr.Button("Create Entry")
+            create_result = gr.Textbox()
+            create_button.click(create_entry_interface, inputs=[content, image_file], outputs=create_result)
         with gr.Tab("View Entries"):
-            view_button = gr.Button("View All Entries")
-            view_output = gr.Textbox(label="All Mood Entries", lines=10)
-            view_button.click(fn=view_mood_entries, outputs=view_output)
+            view_button = gr.Button("View Entries")
+            view_text = gr.Textbox(label="Entry Details")  # For displaying the text details
+            view_images = gr.Gallery(label="Image Previews")  # Gallery for displaying image previews
+            view_button.click(view_entries_interface, outputs=[view_text, view_images])
+        with gr.Tab("Search by ID"):
+            entry_id_search = gr.Textbox(label="Enter the ID of the entry to search:")
+            search_button = gr.Button("Search Entry")
+            search_text = gr.Textbox(label="Search Result")
+            search_images = gr.Gallery(label="Search Image Preview")
+            search_button.click(search_entry_by_id, inputs=[entry_id_search], outputs=[search_text, search_images])
+        with gr.Tab("Edit Entry"):
+            entry_id_edit = gr.Textbox(label="Enter the ID of the entry you want to edit:")
+            new_content = gr.Textbox(label="Enter the new content:")
+            edit_button = gr.Button("Edit Entry")
+            edit_result = gr.Textbox()
+            edit_button.click(edit_entry_interface, inputs=[entry_id_edit, new_content], outputs=edit_result)
+        with gr.Tab("Delete Entry"):
+            entry_id_delete = gr.Textbox(label="Enter the ID of the entry you want to delete:")
+            delete_button = gr.Button("Delete Entry")
+            delete_result = gr.Textbox()
+            delete_button.click(delete_entry_interface, inputs=[entry_id_delete], outputs=delete_result)
+        with gr.Tab("Add Image to Entry"):
+            entry_id_image = gr.Textbox(label="Enter the ID of the entry you want to add an image to:")
+            image_file = gr.File(label="Upload Image File")
+            image_button = gr.Button("Add Image")
+            image_result = gr.Textbox()
+            image_button.click(add_image_interface, inputs=[entry_id_image, image_file], outputs=image_result)
+    return personal_interface
 
-            gr.Markdown("### Edit or Delete an Entry")
+# Goal Tracker tab
+def goal_tab():
+    return goal.Goal_interface()
 
-            entry_id_input = gr.Number(label="Entry ID", value=None)
+# Mood Tracker tab
+def mood_tracker_tab():
+    return moodtracker.mood_interface()
 
-         
-            new_mood_input = gr.Radio(label="New Mood", choices=mood_options)
-            new_notes_input = gr.Textbox(label="New Notes (Optional)", lines=3)
-            edit_button = gr.Button("Edit Mood Entry")
-            edit_output = gr.Textbox(label="Edit Message")
-            edit_button.click(fn=edit_mood_entry, inputs=[entry_id_input, new_mood_input, new_notes_input], outputs=edit_output)
+# Ideas tab
+def ideas_tab():
+    return ideas.ideas_interface()
 
-            
-            delete_button = gr.Button("Delete Mood Entry")
-            delete_output = gr.Textbox(label="Delete Message")
-            delete_button.click(fn=delete_mood_entry, inputs=[entry_id_input], outputs=delete_output)
+def main_interface():
+    with gr.Blocks() as demo:
+        # Add a security key input before accessing the app
+        security_key_input = gr.Textbox(label="Enter security key:", type="password")
+        login_button = gr.Button("Login")
+        error_message = gr.Textbox(visible=False)
+        
+        # Main app will be hidden initially until the correct key is entered
+        with gr.Group(visible=False) as journal_app:
+            gr.Markdown("## Journal App - Choose a Section")
+            with gr.Tabs():
+                with gr.TabItem("Personal"):
+                    personal_tab()  # Ensure it is called to load content
+                with gr.TabItem("Goal Tracker"):
+                    goal_tab()  # Ensure it is called to load content
+                with gr.TabItem("Mood Tracker"):
+                    mood_tracker_tab()  # Ensure it is called to load content
+                with gr.TabItem("Ideas"):
+                    ideas_tab()  # Ensure it is called to load content
 
-    return app
+        # Link login button to check security key
+        login_button.click(check_security_key, inputs=[security_key_input], outputs=[journal_app, error_message])
 
-# Launch Gradio app
-mood_interface().launch()
-
-def show_main_menu():
-<<<<<<< HEAD
-    """Display the main menu for the journal app. ~ Aditi ~ 10/07/2024"""
-    tracker = GoalTracker()
-=======
-    """Displaying the main menu for the journal app - Aditi - 10/14/2024"""
->>>>>>> a892ff5678bfc8cfc3088a5f19201f26ccd7bc40
-    while True:
-        print("\nMain Menu")
-        print("1. Personal Journal")
-        print("2. Goal")
-        print("3. Exit")
-        choice = input("Enter your choice: ")
-
-        if choice == '1':
-            show_personal_menu()
-        elif choice =='2':
-            show_goal_tracker_menu(tracker) 
-        elif choice == '3':
-            print("Goodbye!")
-            break
-        else:
-            print("Invalid choice. Please try again.")
-
-
+    demo.launch()
 
 if __name__ == "__main__":
-    show_main_menu()
+    main_interface()
+
+

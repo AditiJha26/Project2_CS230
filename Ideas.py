@@ -1,13 +1,11 @@
 # Author: Rebecca Rogovich
-# 10/14/2024
-
-# This file handles the "Ideas" category, a freeform space where users can quickly 
-# jot down ideas, thoughts, or brainstorming sessions without any structure.
 
 import json
 import os
+import gradio as gr
 
-ideas_file = 'ideas.json'
+ideas_file = os.path.join(os.getcwd(), 'ideas.json')  
+
 
 def load_ideas():
     if os.path.exists(ideas_file):
@@ -47,3 +45,24 @@ def delete_idea(index):
             return "Invalid idea number."
     except (ValueError, IndexError):
         return "Invalid input. Please enter a valid number."
+
+def ideas_interface():
+    with gr.Blocks() as demo:
+        gr.Markdown("# Journal App: Ideas")
+
+        idea_input = gr.Textbox(label="Enter your idea", placeholder="Type your idea here...")
+        add_button = gr.Button("Add Idea")
+        add_output = gr.Textbox(label="Message", interactive=False)
+
+        view_button = gr.Button("View Ideas")
+        view_output = gr.Textbox(label="List of Ideas", interactive=False)
+
+        delete_input = gr.Number(label="Enter idea number to delete", precision=0)
+        delete_button = gr.Button("Delete Idea")
+        delete_output = gr.Textbox(label="Message", interactive=False)
+
+        add_button.click(add_idea, inputs=idea_input, outputs=add_output)
+        view_button.click(view_ideas, outputs=view_output)
+        delete_button.click(delete_idea, inputs=delete_input, outputs=delete_output)
+
+    return demo
