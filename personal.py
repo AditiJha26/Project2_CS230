@@ -1,18 +1,25 @@
-# Menu Feature
-# Personal Tab
-# By Aditi Jha
-# 10/07/2024
+# Personal Tab of the Journal App:
+# AUthor: Aditi Jha
+# Last updated: October 23, 2024
 
-# This file will handle creating, saving, editing, and deleting "personal" journal entries.
-# Each Entry is given and ID for better editing and search functions.
-# User can add the image by specifying the path of the image when creating a new entry.
+# The following code offers these functionality: This file will handle creating, saving, editing, viewing, and deleting personal entries.
+# Each Entry is given an ID for better editing and search functions.
+# User can also add images while creating new entries or add images after the entry has been created.
 
 import json
 import os
 from datetime import datetime
+from PIL import Image
+import io
+import base64
 
 # Path where personal journal entries will be saved in JSON format
-FILE_PATH = 'personal_journal.json'
+FILE_PATH = os.path.join(os.getcwd(), 'personal_journal.json')  
+IMAGE_DIR = 'images'
+
+# Ensuring the images directory exists
+if not os.path.exists(IMAGE_DIR):
+    os.makedirs(IMAGE_DIR)
 
 def load_entries():
     """Loading all personal journal entries from the JSON file."""
@@ -33,8 +40,8 @@ def generate_new_id(entries):
     else:
         return 1
 
-def create_personal_entry(content, image_path=None):
-    """Creating and saving a new personal journal entry."""
+def create_personal_entry(content, image_data=None):
+    """Creating and saving a new personal journal entry with optional image."""
     entries = load_entries()
     new_id = generate_new_id(entries)
     timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
@@ -43,31 +50,37 @@ def create_personal_entry(content, image_path=None):
         "timestamp": timestamp,
         "content": content,
         "category": "personal",
-        "image_path": image_path  # Optional image path
+        "image_path": None
     }
+    if image_data:
+        try:
+            image_path = os.path.join(IMAGE_DIR, f"{new_id}.png")
+            image = Image.open(io.BytesIO(base64.b64decode(image_data)))
+            image.save(image_path)
+            entry["image_path"] = image_path
+        except Exception as e:
+            return f"Failed to save image: {str(e)}"
     entries.append(entry)
     save_entries(entries)
-    print(f"Personal entry saved with ID: {new_id}")
+    return f"Entry {new_id} created successfully with{'out' if image_data is None else ''} image."
 
 def view_personal_entries():
     """Viewing all personal journal entries."""
+    return load_entries()
+
+def search_entry_by_id(entry_id):
+    """Searching for a specific journal entry by ID."""
     entries = load_entries()
-    if not entries:
-        print("No personal entries found.")
-    else:
-        print("Personal Journal Entries:")
-        for entry in entries:
-            print(f"ID: {entry['id']}")
-            print(f"Timestamp: {entry['timestamp']}")
-            print(f"Content: {entry['content']}")
-            if entry.get("image_path"):
-                print(f"Image: {entry['image_path']}")
-            print("-" * 40)
+    for entry in entries:
+        if entry['id'] == entry_id:
+            return entry
+    return None
 
 def edit_personal_entry(entry_id, new_content):
     """Editing an existing personal journal entry by ID."""
     entries = load_entries()
     found = False
+    entry_id = int(entry_id)  # Ensure ID is treated as integer
     for entry in entries:
         if entry['id'] == entry_id:
             entry['content'] = new_content
@@ -75,16 +88,38 @@ def edit_personal_entry(entry_id, new_content):
             break
     if found:
         save_entries(entries)
-        print("Entry edited successfully.")
+        return "Entry edited successfully."
     else:
-        print("Entry not found.")
+        return "Entry not found."
 
 def delete_personal_entry(entry_id):
     """Deleting an existing personal journal entry by ID."""
     entries = load_entries()
+    entry_id = int(entry_id)  # Ensure ID is treated as integer
     updated_entries = [entry for entry in entries if entry['id'] != entry_id]
     if len(updated_entries) == len(entries):
-        print("Entry not found.")
+        return "Entry not found."
     else:
         save_entries(updated_entries)
-        print("Entry deleted successfully.")
+        return "Entry deleted successfully."
+
+def add_image_to_entry(entry_id, image_data):
+    """Adding an image to an existing entry by ID."""
+    entries = load_entries()
+    found = False
+    for entry in entries:
+        if entry['id'] == int(entry_id):
+            try:
+                image_path = os.path.join(IMAGE_DIR, f"{entry_id}.png")
+                image = Image.open(io.BytesIO(base64.b64decode(image_data)))
+                image.save(image_path)
+                entry['image_path'] = image_path
+                found = True
+                break
+            except Exception as e:
+                print(f"Failed to add image: {str(e)}")
+    if found:
+        save_entries(entries)
+        return f"Image successfully added to entry ID {entry_id}."
+    else:
+        return "Entry not found or invalid image data."
