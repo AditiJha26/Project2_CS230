@@ -90,44 +90,44 @@ def delete_mood_entry(entry_id):
         save_entries(updated_entries)
         return "Entry deleted successfully."
 
-def mood_interface():
-    with gr.Blocks() as app:
-        gr.Markdown("# Mood Tracker")
+# def mood_interface():
+#     with gr.Blocks() as app:
+#         gr.Markdown("# Mood Tracker")
 
-        # Predefined moods scale
-        mood_options = ["Happy", "Sad", "Excited", "Stressed", "Calm", "Anxious", "Angry", "Relaxed"]
+#         # Predefined moods scale
+#         mood_options = ["Happy", "Sad", "Excited", "Stressed", "Calm", "Anxious", "Angry", "Relaxed"]
 
-        # Create Entry
-        with gr.Tab("Create Entry"):
-            mood_input = gr.Radio(label="Select Your Mood", choices=mood_options)
-            notes_input = gr.Textbox(label="Notes (Optional)", lines=3)
-            create_button = gr.Button("Create Mood Entry")
-            create_output = gr.Textbox(label="Message")
-            create_button.click(fn=create_mood_entry, inputs=[mood_input, notes_input], outputs=create_output)
+#         # Create Entry
+#         with gr.Tab("Create Entry"):
+#             mood_input = gr.Radio(label="Select Your Mood", choices=mood_options)
+#             notes_input = gr.Textbox(label="Notes (Optional)", lines=3)
+#             create_button = gr.Button("Create Mood Entry")
+#             create_output = gr.Textbox(label="Message")
+#             create_button.click(fn=create_mood_entry, inputs=[mood_input, notes_input], outputs=create_output)
 
-        # View, Edit and Delete Entries in one Tab
-        with gr.Tab("View Entries"):
-            view_button = gr.Button("View All Entries")
-            view_output = gr.Textbox(label="All Mood Entries", lines=10)
-            view_button.click(fn=view_mood_entries, outputs=view_output)
+#         # View, Edit and Delete Entries in one Tab
+#         with gr.Tab("View Entries"):
+#             view_button = gr.Button("View All Entries")
+#             view_output = gr.Textbox(label="All Mood Entries", lines=10)
+#             view_button.click(fn=view_mood_entries, outputs=view_output)
 
-            gr.Markdown("### Edit or Delete an Entry")
+#             gr.Markdown("### Edit or Delete an Entry")
 
-            entry_id_input = gr.Number(label="Entry ID", value=None)
+#             entry_id_input = gr.Number(label="Entry ID", value=None)
 
-            # Edit Entry with predefined moods
-            new_mood_input = gr.Radio(label="New Mood", choices=mood_options)
-            new_notes_input = gr.Textbox(label="New Notes (Optional)", lines=3)
-            edit_button = gr.Button("Edit Mood Entry")
-            edit_output = gr.Textbox(label="Edit Message")
-            edit_button.click(fn=edit_mood_entry, inputs=[entry_id_input, new_mood_input, new_notes_input], outputs=edit_output)
+#             # Edit Entry with predefined moods
+#             new_mood_input = gr.Radio(label="New Mood", choices=mood_options)
+#             new_notes_input = gr.Textbox(label="New Notes (Optional)", lines=3)
+#             edit_button = gr.Button("Edit Mood Entry")
+#             edit_output = gr.Textbox(label="Edit Message")
+#             edit_button.click(fn=edit_mood_entry, inputs=[entry_id_input, new_mood_input, new_notes_input], outputs=edit_output)
 
-            # Delete Entry
-            delete_button = gr.Button("Delete Mood Entry")
-            delete_output = gr.Textbox(label="Delete Message")
-            delete_button.click(fn=delete_mood_entry, inputs=[entry_id_input], outputs=delete_output)
+#             # Delete Entry
+#             delete_button = gr.Button("Delete Mood Entry")
+#             delete_output = gr.Textbox(label="Delete Message")
+#             delete_button.click(fn=delete_mood_entry, inputs=[entry_id_input], outputs=delete_output)
 
-    return app
+#     return app
 
-# Launch Gradio app
-mood_interface().launch()
+# # Launch Gradio app
+# mood_interface().launch()
