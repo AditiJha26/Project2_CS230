@@ -1,5 +1,5 @@
 import personal
-import moodtracker
+import
 import datetime
 import gradio as gr
 
