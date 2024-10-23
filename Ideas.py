@@ -20,59 +20,30 @@ def save_ideas(ideas):
     with open(ideas_file, 'w') as file:
         json.dump(ideas, file, indent=4)
 
-def view_ideas(ideas):
+def view_ideas():
+    ideas = load_ideas()
     if not ideas:
-        print("No ideas found.")
+        return "No ideas found."
     else:
-        for idx, idea in enumerate(ideas, start=1):
-            print(f"{idx}. {idea}")
+        return "\n".join([f"{idx+1}. {idea}" for idx, idea in enumerate(ideas)])
 
-def add_idea():
-    idea = input("Enter your idea: ")
+def add_idea(new_idea):
+    if new_idea.strip() == "":
+        return "Idea cannot be empty."
     ideas = load_ideas()
-    ideas.append(idea)
+    ideas.append(new_idea)
     save_ideas(ideas)
-    print("Idea saved successfully.")
+    return f"Idea '{new_idea}' saved successfully!"
 
-def delete_idea():
-    ideas = load_ideas()
-    if not ideas:
-        print("No ideas to delete.")
-        return
-    view_ideas(ideas)
+def delete_idea(index):
     try:
-        idx = int(input("Enter the number of the idea to delete: ")) - 1
+        ideas = load_ideas()
+        idx = int(index) - 1
         if 0 <= idx < len(ideas):
             deleted_idea = ideas.pop(idx)
             save_ideas(ideas)
-            print(f"Idea '{deleted_idea}' deleted successfully.")
+            return f"Idea '{deleted_idea}' deleted successfully."
         else:
-            print("Invalid idea number.")
-    except ValueError:
-        print("Invalid input. Please enter a valid number.")
-
-def ideas_menu():
-    while True:
-        print("\nIdeas Menu:")
-        print("1. View Ideas")
-        print("2. Add Idea")
-        print("3. Delete Idea")
-        print("4. Exit")
-
-        choice = input("Choose an option: ")
-
-        if choice == '1':
-            ideas = load_ideas()
-            view_ideas(ideas)
-        elif choice == '2':
-            add_idea()
-        elif choice == '3':
-            delete_idea()
-        elif choice == '4':
-            print("Exiting Ideas Menu.")
-            break
-        else:
-            print("Invalid choice. Please try again.")
-
-if __name__ == "__main__":
-    ideas_menu()
+            return "Invalid idea number."
+    except (ValueError, IndexError):
+        return "Invalid input. Please enter a valid number."
