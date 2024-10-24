@@ -7,6 +7,7 @@ This is a personal journal app built using Python and Gradio. The app provides f
 The app has four main sections:
 
 ### 1. Personal Journal
+
 - **Create Entry:** Create personal journal entries with optional image uploads.
 - **View Entries:** View all saved entries along with image previews (if any).
 - **Search by ID:** Search for a specific entry by its ID.
@@ -15,17 +16,20 @@ The app has four main sections:
 - **Add Image to Entry:** Upload an image to an existing journal entry.
 
 ### 2. Goal Tracker
+
 - **Add Goal:** Set new goals categorized by yearly, monthly, or daily types.
 - **View Goals:** Display all existing goals.
 - **Delete Goal:** Remove a goal by its ID.
 
 ### 3. Mood Tracker
+
 - **Create Mood Entry:** Log your mood from a predefined list of options and optionally add notes.
 - **View Entries:** View a list of all mood entries with their timestamps.
 - **Edit Entry:** Update an existing mood entry.
 - **Delete Entry:** Remove a mood entry by its ID.
 
 ### 4. Ideas
+
 - **Add Idea:** Save a new idea.
 - **View Ideas:** Display all saved ideas.
 - **Delete Idea:** Remove an idea by its number.
@@ -43,6 +47,7 @@ You can install the required libraries by running:
 pip install gradio pillow
 
 ## How to Run the App:
+
 - Clone the repository to your local machine.
 - Make sure all the necessary libraries are installed.
 - Navigate to the directory containing the project files.
@@ -50,5 +55,5 @@ pip install gradio pillow
 - Once the app is running, open the provided localhost URL (e.g., http://127.0.0.1:7860) in your browser to access the journal app.
 
 ## Security Key:
-- To Access the app, enter the key: 1234, or you can change to other key as desired in the code.
 
+- To Access the app, enter the key: 1234, or you can change to other key as desired in the code.
