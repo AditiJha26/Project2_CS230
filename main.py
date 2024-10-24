@@ -5,7 +5,7 @@ import gradio as gr
 import personal
 import goal
 import moodtracker
-import ideas
+import Ideas
 import os
 import base64
 
@@ -137,7 +137,7 @@ def mood_tracker_tab():
 
 # Ideas tab
 def ideas_tab():
-    return ideas.ideas_interface()
+    return Ideas.ideas_interface()
 
 def main_interface():
     with gr.Blocks() as demo:

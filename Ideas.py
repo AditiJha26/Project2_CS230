@@ -48,7 +48,7 @@ def delete_idea(index):
 
 def ideas_interface():
     with gr.Blocks() as demo:
-        gr.Markdown("# Journal App: Ideas")
+        gr.Markdown("# Ideas")
 
         idea_input = gr.Textbox(label="Enter your idea", placeholder="Type your idea here...")
         add_button = gr.Button("Add Idea")
