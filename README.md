@@ -19,6 +19,7 @@ The app has four main sections:
 
 - **Add Goal:** Set new goals categorized by yearly, monthly, or daily types.
 - **View Goals:** Display all existing goals.
+- **Edit Goal:** Update an existing goal.
 - **Delete Goal:** Remove a goal by its ID.
 
 ### 3. Mood Tracker
